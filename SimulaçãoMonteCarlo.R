@@ -52,7 +52,7 @@ trvg <- function(amostra, alpha0, significancia) {
   #### Calcular o valor da estatística W
   w = 2*length(amostra)*
     log((gamma(est_alpha_r)*(mean(amostra)/est_alpha_r)**est_alpha_r)/(gamma(est_alpha_ir)*(mean(amostra)/est_alpha_ir)**est_alpha_ir))+
-    2*length(amostra)*est_alpha_r-2*length(amostra)*est_alpha_ir+2*(est_alpha_r-est_alpha_ir)*sum(log(amostra))
+    2*length(amostra)*est_alpha_r-2*length(amostra)*est_alpha_ir+2*(est_alpha_ir-est_alpha_r)*sum(log(amostra))
   
   #### Calcular o p-valor assintótico
   p_valor <- pchisq(q = w, df = 1, lower.tail = FALSE)
@@ -70,9 +70,6 @@ trvg <- function(amostra, alpha0, significancia) {
     rejeita_H0 = rejeita
   ))
 }
-
-## Definir os critérios para a simulação ###################################################################################################
-## ...
 
 ## Avaliar do tamanho do teste #############################################################################################################
 ## ...
