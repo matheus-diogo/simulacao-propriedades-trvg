@@ -64,10 +64,10 @@ trvg <- function(amostra, alpha0, significancia) {
   rejeita <- ifelse(p_valor < significancia, TRUE, FALSE)
 
   return(list(
-    estimativa_alpha_irrestritra = est_alpha_ir,
-    estimativa_alpha_restritra = est_alpha_r,
-    estimativa_beta_irrestritra = est_beta_ir,
-    estimativa_beta_restritra = est_beta_r,
+    estimativa_alpha_irrestrita = est_alpha_ir,
+    estimativa_alpha_restrita = est_alpha_r,
+    estimativa_beta_irrestrita = est_beta_ir,
+    estimativa_beta_restrita = est_beta_r,
     estatistica_w = w,
     p_valor_assintotico = p_valor,
     rejeita_H0 = rejeita
