@@ -49,10 +49,13 @@ trvg <- function(amostra, alpha0, significancia) {
   #### Determinar beta sob espaço paramétrico restrito
   est_beta_r <- mean(amostra) / est_alpha_r
 
+  #### Calcular tamanho amostral e média amostral
+  n = length(amostra)
+  m = mean(amostra)
+
   #### Calcular o valor da estatística W
-  w = 2*length(amostra)*
-    log((gamma(est_alpha_r)*(mean(amostra)/est_alpha_r)**est_alpha_r)/(gamma(est_alpha_ir)*(mean(amostra)/est_alpha_ir)**est_alpha_ir))+
-    2*length(amostra)*est_alpha_r-2*length(amostra)*est_alpha_ir+2*(est_alpha_ir-est_alpha_r)*sum(log(amostra))
+  w = 2*n * log((gamma(est_alpha_r)*(m/est_alpha_r)**est_alpha_r) / (gamma(est_alpha_ir)*(m/est_alpha_ir)**est_alpha_ir)) +
+      2*n*est_alpha_r - 2*n*est_alpha_ir + 2*(est_alpha_ir-est_alpha_r) * sum(log(amostra))
   
   #### Calcular o p-valor assintótico
   p_valor <- pchisq(q = w, df = 1, lower.tail = FALSE)
