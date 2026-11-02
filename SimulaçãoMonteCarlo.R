@@ -117,26 +117,22 @@ for (n in tamanhos_amostrais) {
 #### Observe que a distribuição Exponencial é um caso da distribuição Gama com alpha = 1
 
 ### Construir a tabela de níveis de significância estimado para cada tamanho amostral
-amostras_trvg_sob_h0 %>% group_by(tamanho_amostral) %>% summarise(significancia_estimada = mean(rejeita)) -> t_amostrais_sig_estimada
+amostras_trvg_sob_h0 %>% group_by(tamanho_amostral) %>% summarise(significancia_estimada = mean(rejeita)) -> tabela1
 
 ### Salvar o resultado em um .CSV
-t_amostrais_sig_estimada %>% write.csv('TamanhosAmostraisSignificanciaEstimada.csv')
+tabela1 %>% write.csv('tabela1.csv')
 
-### Exibir a evolução das estimativas com o aumento do tamanho amostral
+### Exibir a evolução dos níveis de significância estimados com o aumento do tamanho amostral
 plot(
-  x = t_amostrais_sig_estimada$tamanho_amostral,
-  y = t_amostrais_sig_estimada$significancia_estimada,
+  x = tabela1$tamanho_amostral,
+  y = tabela1$significancia_estimada,
   main = 'Evolução das Estimativas por Tamanho Amostral',
   xlab = 'Tamanho Amostral',
   ylab = 'Nível de Significância Estimado',
-  type = 'b',
-  axes = FALSE
+  type = 'b'
 )
-abline(h = significancia_exata, lty = 2)
-box()
-axis(side = 1, at = tamanhos_amostrais)
-axis(side = 2, at = t_amostrais_sig_estimada$significancia_estimada)
-legend(x = 'topright', legend = 'Nível de Significância Exato', lty = 2)
+abline(h = significancia_exata, lty = 2, col = 'red')
+legend(x = 'topright', legend = 'Nível de Significância Exato', lty = 2, col = 'red')
 
 ## Avaliar do poder do teste ###############################################################################################################
 
@@ -170,13 +166,34 @@ for (alpha in alphas) {
 }
 
 ### Construir a tabela de probabilidades de rejeição estimadas para cada tamanho amostral e valor verdadeiro alpha
-amostras_trvg_sob_h1 %>% group_by(tamanho_amostral, alpha_verdadeiro) %>% summarise(prob_rejeicao_estimada = mean(rejeita)) -> t_amostrais_alphas_prob_rej_estimada
+amostras_trvg_sob_h1 %>% group_by(tamanho_amostral, alpha_verdadeiro) %>% summarise(prob_rejeicao_estimada = mean(rejeita)) -> tabela2
 
 ### Salvar o resultado em um .CSV
-t_amostrais_alphas_prob_rej_estimada %>% write.csv('TamanhosAmostraisAlphasProbabilidadeRejeicaoEstimada.csv')
+tabela2 %>% write.csv('Tabela2.csv')
 
 ### Exibir a evolução das estimativas na mudança do valor verdadeiro de alpha com o aumento do tamanho amostral
-### ...
+
+#### Organizar os gráficos para cada tamanho amostral em 2 por 3
+layout(matrix(c(
+  1, 1, 2, 2, 3, 3,
+  0, 4, 4, 5, 5, 0
+), 2, 6, byrow = TRUE))
+
+for (n in tamanhos_amostrais) {
+  #### Filtrar a tabela para tamanho amostral n
+  tabela2_filtrada <- tabela2 %>% filter(tamanho_amostral == n)
+  
+  #### 
+  plot(
+    x = tabela2_filtrada$alpha_verdadeiro,
+    y = tabela2_filtrada$prob_rejeicao_estimada,
+    main = paste0('Com ', as.character(n), ' observações'),
+    xlab = 'Valor Verdadeiro de Alfa',
+    ylab = 'Probabilidade de Rejeição Estimada',
+    type = 'b',
+    col = 'red'
+  )
+}
 
 ## Salvar o tempo total de execução do script
 tempo_total <- Sys.time() - tempo_inicial
