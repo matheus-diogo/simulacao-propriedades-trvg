@@ -84,10 +84,76 @@ trvg <- function(amostra, alpha0, significancia) {
 tamanhos_amostrais <- c(20, 30, 50, 100, 200)
 
 ### Fixar a quantidade de réplicas para cada tamanho amostral e avaliação
-replicas <- 10000
+R <- 10000
 
 ### Fixar a seed para reprodutibilidade
 set.seed(2026)
+
+## Avaliar a distribuição assintótica do teste #############################################################################################
+
+### Criar uma tabela com os valores da estatística W, sob H0, para cada tamanho amostral
+amostras_valores_estatistica_w <- tibble(
+  tamanho_amostral = integer(), valor_estatistica_w = numeric()
+)
+
+### Determinar o nível de significância do teste
+significancia <- 0.05
+
+### Calcular os valores da estatística W, sob H0, para cada tamanho amostral
+for (n in tamanhos_amostrais) {
+  for (r in 1:R) {
+    ### Gerar amostra aleatória da distribuição gama com forma == 1 e escala == 2
+    amostra <- rgamma(n = n, shape = 1, scale = 2)
+
+    ### Registrar o valor da estatística W dada a amostra gerada
+    amostras_valores_estatistica_w <- amostras_valores_estatistica_w %>%
+      add_row(
+        tamanho_amostral = n,
+        valor_estatistica_w = trvg(amostra = amostra, alpha0 = 1, significancia = significancia)$estatistica_w
+      )
+  }
+}
+
+#### Organizar os gráficos para cada tamanho amostral em 2 por 3
+layout(matrix(c(
+  1, 1, 2, 2, 3, 3,
+  0, 4, 4, 5, 5, 0
+), 2, 6, byrow = TRUE))
+
+### Exibir os histogramas dos valores da estatística W, sob H0, para cada tamanho amostral
+for (n in tamanhos_amostrais) {
+  #### Filtrar a tabela de valores da estatística W, sob H0, por tamanho amostral
+  tabela_filtrada <- amostras_valores_estatistica_w %>% filter(tamanho_amostral == n)
+
+  #### Gerar o respectivo histograma da tabela filtrada
+  hist(
+    x = tabela_filtrada$valor_estatistica_w,
+    main = paste0('Com ', as.character(n), ' observações'),
+    xlab = 'Valor da Estatística W',
+    ylab = '',
+    freq = FALSE,
+  )
+
+  #### Adicionar uma curva da distribuição assintótica teórica da estatística W
+  curve(dchisq(x, df = 1), lty = 2, col = 'red', add = TRUE)
+}
+
+### Exibir os gráficos Q-Q da estatística W, sob H0, para cada tamanho amostral
+for (n in tamanhos_amostrais) {
+  #### Filtrar a tabela de valores da estatística W, sob H0, por tamanho amostral
+  tabela_filtrada <- amostras_valores_estatistica_w %>% filter(tamanho_amostral == n)
+
+  #### Gerar o respectivo gráfico Q-Q da tabela filtrada
+  qqplot(
+    x = tabela_filtrada$valor_estatistica_w,
+    y = qchisq(ppoints(rchisq(500, df = 1)), df = 1),
+    main = paste0('Com ', as.character(n), ' observações'),
+    xlab = 'Quantil Empírico',
+    ylab = 'Quantil Teórico',
+    xlim = c(0, 20),
+    ylim = c(0, 20)
+  ); abline(0, 1, col = 'red', lty = 2)
+}
 
 ## Avaliar do tamanho do teste #############################################################################################################
 
@@ -101,7 +167,7 @@ significancia_exata <- 0.05
 
 ### Calcular o nível de significância estimado do teste dada amostras de uma distribuição Exponencial com escala == 2
 for (n in tamanhos_amostrais) {
-  for (r in 1:replicas) {
+  for (r in 1:R) {
     #### Gerar a amostra aleatória de determinada distribuição
     amostra <- rexp(n = n, rate = 1/2)
 
@@ -114,13 +180,16 @@ for (n in tamanhos_amostrais) {
   }
 }
 
-#### Observe que a distribuição Exponencial é um caso da distribuição Gama com alpha = 1
+#### Observe que a distribuição Exponencial é um caso da distribuição Gama com forma == 1
 
 ### Construir a tabela de níveis de significância estimado para cada tamanho amostral
 amostras_trvg_sob_h0 %>% group_by(tamanho_amostral) %>% summarise(significancia_estimada = mean(rejeita)) -> tabela1
 
 ### Salvar o resultado em um .CSV
 tabela1 %>% write.csv('tabela1.csv')
+
+#### Restaurar a visualização de um único gráfico
+dev.off()
 
 ### Exibir a evolução dos níveis de significância estimados com o aumento do tamanho amostral
 plot(
@@ -150,7 +219,7 @@ alphas <- seq(from = 0.5, to = 1.5, by = 0.1)
 ### Calcular o nível de significância estimado do teste dada amostras de uma distribuição Gama com alpha variados e beta fixo
 for (alpha in alphas) {
   for (n in tamanhos_amostrais) {
-    for (r in 1:replicas) {
+    for (r in 1:R) {
       #### Gerar a amostra aleatória de determinada distribuição
       amostra <- rgamma(n = n, shape = alpha, scale = 2)
       
