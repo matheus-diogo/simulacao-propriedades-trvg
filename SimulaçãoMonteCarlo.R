@@ -122,6 +122,22 @@ amostras_trvg_sob_h0 %>% group_by(tamanho_amostral) %>% summarise(significancia_
 ### Salvar o resultado em um .CSV
 t_amostrais_sig_estimada %>% write.csv('TamanhosAmostraisSignificanciaEstimada.csv')
 
+### Exibir a evolução das estimativas com o aumento do tamanho amostral
+plot(
+  x = t_amostrais_sig_estimada$tamanho_amostral,
+  y = t_amostrais_sig_estimada$significancia_estimada,
+  main = 'Evolução das Estimativas por Tamanho Amostral',
+  xlab = 'Tamanho Amostral',
+  ylab = 'Nível de Significância Estimado',
+  type = 'b',
+  axes = FALSE
+)
+abline(h = significancia_exata, lty = 2)
+box()
+axis(side = 1, at = tamanhos_amostrais)
+axis(side = 2, at = t_amostrais_sig_estimada$significancia_estimada)
+legend(x = 'topright', legend = 'Nível de Significância Exato', lty = 2)
+
 ## Avaliar do poder do teste ###############################################################################################################
 
 ### Criar uma tabela com o tamanho amostral e a decisão de rejeitar H0
@@ -158,6 +174,9 @@ amostras_trvg_sob_h1 %>% group_by(tamanho_amostral, alpha_verdadeiro) %>% summar
 
 ### Salvar o resultado em um .CSV
 t_amostrais_alphas_prob_rej_estimada %>% write.csv('TamanhosAmostraisAlphasProbabilidadeRejeicaoEstimada.csv')
+
+### Exibir a evolução das estimativas na mudança do valor verdadeiro de alpha com o aumento do tamanho amostral
+### ...
 
 ## Salvar o tempo total de execução do script
 tempo_total <- Sys.time() - tempo_inicial
