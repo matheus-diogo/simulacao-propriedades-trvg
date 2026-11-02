@@ -195,7 +195,7 @@ dev.off()
 plot(
   x = tabela1$tamanho_amostral,
   y = tabela1$significancia_estimada,
-  main = 'Evolução das Estimativas por Tamanho Amostral',
+  main = 'Evolução dos Níveis de Significância Estimados por Tamanho Amostral',
   xlab = 'Tamanho Amostral',
   ylab = 'Nível de Significância Estimado',
   type = 'b'
