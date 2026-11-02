@@ -86,6 +86,9 @@ tamanhos_amostrais <- c(20, 30, 50, 100, 200)
 ### Fixar a quantidade de réplicas para cada tamanho amostral e avaliação
 replicas <- 10000
 
+### Fixar a seed para reprodutibilidade
+set.seed(2026)
+
 ## Avaliar do tamanho do teste #############################################################################################################
 
 ### Criar uma tabela com o tamanho amostral e a decisão de rejeitar H0
@@ -116,26 +119,45 @@ for (n in tamanhos_amostrais) {
 ### Construir a tabela de níveis de significância estimado para cada tamanho amostral
 amostras_trvg_sob_h0 %>% group_by(tamanho_amostral) %>% summarise(significancia_estimada = mean(rejeita)) -> t_amostrais_sig_estimada
 
+### Salvar o resultado em um .CSV
+t_amostrais_sig_estimada %>% write.csv('TamanhosAmostraisSignificanciaEstimada.csv')
+
 ## Avaliar do poder do teste ###############################################################################################################
 
 ### Criar uma tabela com o tamanho amostral e a decisão de rejeitar H0
 amostras_trvg_sob_h1 <- tibble(
-    tamanho_amostral = integer(), rejeita = logical()
+    tamanho_amostral = integer(), alpha_verdadeiro = numeric(), rejeita = logical()
 )
 
 ### Determinar o nível de significância do teste
 significancia <- 0.05
 
+### Definir diferentes valores de alpha
+alphas <- seq(from = 0.5, to = 1.5, by = 0.1)
+
 ### Calcular o nível de significância estimado do teste dada amostras de uma distribuição Gama com alpha variados e beta fixo
-for (n in tamanhos_amostrais) {
-  for (r in replicas) {
-    #### Gerar a amostra aleatória de determinada distribuição
-    amostra <- rgamma(n = n, shape = alpha, scale = 2)
-    
-    #### Construir um gráfico da curva da função poder com o alpha variando de 0 até 2
-    #### ...
-    }
+for (alpha in alphas) {
+  for (n in tamanhos_amostrais) {
+    for (r in 1:replicas) {
+      #### Gerar a amostra aleatória de determinada distribuição
+      amostra <- rgamma(n = n, shape = alpha, scale = 2)
+      
+      #### Registrar o resultado do TRVG
+      amostras_trvg_sob_h1 <- amostras_trvg_sob_h1 %>%
+        add_row(
+          alpha_verdadeiro = alpha,
+          tamanho_amostral = n,
+          rejeita = trvg(amostra = amostra, alpha0 = 1, significancia = significancia)$rejeita_H0
+        )
+      }
+  }
 }
+
+### Construir a tabela de probabilidades de rejeição estimadas para cada tamanho amostral e valor verdadeiro alpha
+amostras_trvg_sob_h1 %>% group_by(tamanho_amostral, alpha_verdadeiro) %>% summarise(prob_rejeicao_estimada = mean(rejeita)) -> t_amostrais_alphas_prob_rej_estimada
+
+### Salvar o resultado em um .CSV
+t_amostrais_alphas_prob_rej_estimada %>% write.csv('TamanhosAmostraisAlphasProbabilidadeRejeicaoEstimada.csv')
 
 ## Salvar o tempo total de execução do script
 tempo_total <- Sys.time() - tempo_inicial
