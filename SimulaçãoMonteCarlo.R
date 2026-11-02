@@ -252,7 +252,7 @@ for (n in tamanhos_amostrais) {
   #### Filtrar a tabela para tamanho amostral n
   tabela2_filtrada <- tabela2 %>% filter(tamanho_amostral == n)
   
-  #### 
+  #### Gerar as curvas da função poder dado tamanho amostral n
   plot(
     x = tabela2_filtrada$alpha_verdadeiro,
     y = tabela2_filtrada$prob_rejeicao_estimada,
