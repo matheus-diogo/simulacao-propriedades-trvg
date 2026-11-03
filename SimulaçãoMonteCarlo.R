@@ -186,7 +186,7 @@ for (n in tamanhos_amostrais) {
 amostras_trvg_sob_h0 %>% group_by(tamanho_amostral) %>% summarise(significancia_estimada = mean(rejeita)) -> tabela1
 
 ### Salvar o resultado em um .CSV
-tabela1 %>% write.csv('tabela1.csv')
+tabela1 %>% write.csv('Tabela1.csv')
 
 #### Restaurar a visualização de um único gráfico
 dev.off()
